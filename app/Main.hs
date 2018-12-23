@@ -13,6 +13,7 @@ import Control.Monad (when, unless)
 import Control.Arrow
 import qualified FRP.Yampa as Frp 
 
+-- GLFW boiler plate
 withWindow :: Int -> Int -> String -> (GLFW.Window -> IO ()) -> IO () 
 withWindow width height title f = do
    GLFW.setErrorCallback $ Just simpleErrorCallback 
@@ -34,16 +35,36 @@ windowWidth, windowHeight :: Int
 windowWidth = 640
 windowHeight = 480
 
--- First attempt frp 
+-- Game specific data types
 
-type Pos = Point
-data Player = Player {position::Pos}
+-- Type aliases
+type Pos           = Point
+type UserCommands  = (Bool,Bool,Bool,Bool)
 
-type Inpdirection = (Bool,Bool,Bool,Bool)
-type Inp = Frp.Event Inpdirection
-type Out = Player
+-- Enumerations
+data MonsterStatus = Wander Direction Int | Hunting
+data Direction     = WalkUp | WalkDown | WalkLeft | WalkRight
 
-initPlayerState = Player (20.0,20.0)
+
+data Player        = Player {
+                               position::Pos
+                            }
+data Monster       = Monster {
+                               position::Pos
+                              ,monsterStatus::MonsterStatus
+                             }
+
+-- Signal inputs and outputs
+Data Input  = Input {
+                       userInput    :: Frp.Event UserCommands
+                      ,monsterInput :: Int
+                    }
+
+Data Output = Output {
+                       getPlayer  :: Player
+                      ,getMonster :: Monster
+                      }
+
 
 main :: IO ()
 main = do
